@@ -1,8 +1,10 @@
 import uuid
+from CentreServer import Server
 class Task:
-    def __init__(self,ID,res_req,size,priority,mtt,timestamp):
+    def __init__(self,ID,vehicleID,res_req,size,priority,mtt,timestamp):
         self.priority=property
         self.id=ID
+        self.vehicleID=vehicleID
         self.res_req=res_req
         self.size=size
         self.mtt=mtt
@@ -39,13 +41,20 @@ class Vehicle:
             self.cpower=1000
 
 
-    def take(self,task:Task):
+    def take(self,task:Task,server):
         #update info
         task.undertaker="V"
-        task.status=3
+        task.status=2
         self.resource-=task.res_req
         self.cpower_update()
         print(f"vehicleID:{self.id},take the job NO:{task.id},remain cpower:{self.cpower},remain resource:{self.resource}")
         task.timeConsumeUpdate(task.size/self.cpower)
+        server.update_task_status_lists()
+
+    def received_or_completde(self,task:Task,server):
+        task.status=3
+        server.update_task_status_lists()
 
 
+    def get_estimated_processing_time(self, task: Task):
+        return task.size / self.cpower

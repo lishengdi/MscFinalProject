@@ -16,14 +16,15 @@ class Node:
         if self.type=="R":
             self.cpower=self.cpower-(1000-self.resource)*0.4
 
-    def take(self,task:Task):
+    def take(self,task:Task,server):
         #update info
         task.undertaker="V"
-        task.status=3
+        task.status=2
         self.resource-=task.res_req
         self.cpower_update()
         print(f"vehicleID:{self.id},take the job NO:{task.id},remain cpower:{self.cpower},remain resource:{self.resource}")
         task.turnoverTime_real=task.size/self.cpower
+        server.update_task_status_lists()
 
     def relay(self,task:Task):
         task.stageUpdate(status=2,undertaker=self.type)
@@ -44,4 +45,8 @@ class Node:
                 self.resource =3000
             if self.cpower > 3000:
                 self.cpower = 3000
+
+    def get_estimated_processing_time(self,task:Task):
+        return task.size/self.cpower
+
 
