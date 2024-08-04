@@ -7,7 +7,7 @@ class Node:
         self.location=loc
         self.radius=50 if type=="R" else self.radius=30
         self.resource=3000 if type=="R" else self.resource=2000
-        self.cpower=3000 if type=="R" else self.resource=2000
+        self.cpower=3000 if type=="R" else self.resource=1500
         self.bandwidth=10000
 
     def cpower_update(self):

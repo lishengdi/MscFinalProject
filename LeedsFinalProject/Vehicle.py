@@ -1,8 +1,8 @@
 import uuid
 from CentreServer import Server
 class Task:
-    def __init__(self,ID,vehicleID,res_req,size,priority,mtt,timestamp):
-        self.priority=property
+    def __init__(self,ID,vehicleID,res_req,size,priority,mtt,timestamp,data):
+        self.priority=priority
         self.id=ID
         self.vehicleID=vehicleID
         self.res_req=res_req
@@ -15,6 +15,7 @@ class Task:
         self.returnViaRelay=False
         self.timeStamp=timestamp
         self.res_size=self.size*0.4
+        self.data=data
     def stageUpdate(self,status,undertaker):
         self.status=status
         self.undertaker=undertaker
@@ -24,10 +25,10 @@ class Task:
 class Vehicle:
     def __init__(self,loc,speed):
         self.id=uuid.uuid4()
-        self.cpower=1000
+        self.cpower=500
         self.location=loc
         self.velocity=speed
-        self.resource=1000
+        self.resource=500
 
     def cpower_update(self):
         self.cpower=self.cpower-(1000-self.resource)*0.5
