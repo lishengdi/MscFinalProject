@@ -1,14 +1,15 @@
 import uuid
 from Vehicle import Task,Vehicle
 class Node:
-    def __init__(self,type,loc):
+    def __init__(self,env,type,loc):
         self.id=uuid.uuid4()
         self.type=type # "U":UAV, "R": RSU
         self.location=loc
         self.radius=50 if type=="R" else self.radius=30
-        self.resource=3000 if type=="R" else self.resource=2000
-        self.cpower=3000 if type=="R" else self.resource=1500
+        self.resource=300 if type=="R" else self.resource=200
+        self.cpower=300 if type=="R" else self.resource=200
         self.bandwidth=10000
+        self.speed=0 if type=="R" else self.speed=150
 
     def cpower_update(self):
         if self.type=="U":
@@ -26,6 +27,7 @@ class Node:
         task.turnoverTime_real=task.size/self.cpower
         server.update_task_status_lists()
 
+
     def relay(self,task:Task):
         task.stageUpdate(status=2,undertaker=self.type)
         task.timeConsumeUpdate(task.res_size*2/self.bandwidth)
@@ -36,15 +38,15 @@ class Node:
         self.resource += task.res_req
         self.cpower += task.res_req * 0.5
         if self.type=="U":
-            if self.resource > 2000:
-                self.resource =2000
-            if self.cpower > 2000:
-                self.cpower = 2000
+            if self.resource > 200:
+                self.resource =200
+            if self.cpower > 200:
+                self.cpower = 200
         if self.type=="R":
-            if self.resource > 3000:
-                self.resource =3000
-            if self.cpower > 3000:
-                self.cpower = 3000
+            if self.resource > 300:
+                self.resource =300
+            if self.cpower > 300:
+                self.cpower = 300
 
     def get_estimated_processing_time(self,task:Task):
         return task.size/self.cpower

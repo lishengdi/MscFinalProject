@@ -31,14 +31,14 @@ def Offloading_node_selection(task,server):
     epsilon = 1.0  # Exploration rate
     epsilon_decay = 0.99
     min_epsilon = 0.01
-    num_episodes = 1000
+    num_episodes = 100
     threshold_speed=100
     # Define the ranges for state space dimensions
-    task_size_range = 50000
-    speed_range = 120
-    position_range = 5000
-    rsu_resource_range = 3000
-    uav_resource_range = 2000
+    task_size_range = 300
+    speed_range = 100
+    position_range = 1000
+    rsu_resource_range = 500
+    uav_resource_range = 300
 
     # Initialize Q-table
     state_space = (task_size_range, speed_range, position_range, rsu_resource_range, uav_resource_range)

@@ -1,59 +1,53 @@
 import simpy
+import Vehicle
+import ServiceNode
+import Algorithms
+import CentreServer
+import time
+import random
+import numpy as np
 
-class Vehicle:
-    def __init__(self, env, name, server, rsu, drone):
-        self.env = env
-        self.name = name
-        self.server = server
-        self.rsu = rsu
-        self.drone = drone
-        self.action = env.process(self.run())
-
-    def run(self):
-        while True:
-            # Simulate sending data to RSU
-            print(f'{self.name} sending data to RSU at {self.env.now}')
-            yield self.env.process(self.send_data(self.rsu))
-
-            # Simulate processing data at RSU
-            print(f'{self.name} waiting for RSU processing at {self.env.now}')
-            yield self.env.timeout(2)
-
-            # Simulate sending data to Central Server
-            print(f'{self.name} sending data to Central Server at {self.env.now}')
-            yield self.env.process(self.send_data(self.server))
-
-            # Simulate sending data to Drone
-            print(f'{self.name} sending data to Drone at {self.env.now}')
-            yield self.env.process(self.send_data(self.drone))
-
-            # Wait before next communication cycle
-            yield self.env.timeout(5)
-
-    def send_data(self, node):
-        with node.request() as req:
-            yield req
-            yield self.env.timeout(1)
-            print(f'{self.name} finished sending data to {node.name} at {self.env.now}')
-
-class Server:
-    def __init__(self, env, name, capacity):
-        self.env = env
-        self.name = name
-        self.resource = simpy.Resource(env, capacity=capacity)
-
-    def request(self):
-        return self.resource.request()
-
+np.random.seed(42)
 env = simpy.Environment()
 
-# Create RSU, Drones and Server
-rsu_units = [Server(env, f'RSU_{i}', 1) for i in range(4)]
-drone_units = [Server(env, f'Drone_{i}', 1) for i in range(4)]
-central_server = Server(env, 'CentralServer', 1)
+NUM_Vehicle=50
+Max_NUM_Tasks=100
+NUM_RSU=10
+NUM_UAV=10
+speed_range = (-100, 100)
+mean_speed1 = -50
+mean_speed2 = 50
+std_dev_speed = 20
 
-# Create Vehicles
-vehicles = [Vehicle(env, f'Vehicle_{i}', central_server, rsu_units[i % 4], drone_units[i % 4]) for i in range(10)]
+
+vehicle_positions = np.random.uniform(0, 1000, NUM_Vehicle)
+
+vehicle_speeds1 = np.random.normal(mean_speed1, std_dev_speed, NUM_Vehicle // 2)
+vehicle_speeds2 = np.random.normal(mean_speed2, std_dev_speed, NUM_Vehicle // 2)
+vehicle_speeds = np.concatenate((vehicle_speeds1, vehicle_speeds2))
+
+#build and start centre Server
+centre_server=CentreServer.Server(env)
+centre_server.run()
+
+#create vehicle
+for i in range(NUM_Vehicle):
+    centre_server.vehicles.append(
+        Vehicle.Vehicle(env,vehicle_positions[i],vehicle_speeds[i],centre_server)
+    )
+    centre_server.vehicles[i].run()
+
+#create and start Nodes
+for i in range(NUM_RSU):
+    centre_server.Nodes.append(ServiceNode.Node(env,"R",np.random.randint(0,1000)))
+for i in range(NUM_RSU):
+    centre_server.Nodes.append(ServiceNode.Node(env,"U",np.random.randint(0,1000)))
+for i in range(NUM_UAV+NUM_RSU):
+    centre_server.Nodes[i].run()
 
 # Run the simulation
-env.run(until=30)
+env.run(until=100)
+
+print(f"Current System Average Latency: {centre_server.avgLatency}")
+
+

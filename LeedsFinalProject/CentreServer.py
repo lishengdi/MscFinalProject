@@ -1,7 +1,8 @@
+import Algorithms
 from Vehicle import Vehicle,Task
 from ServiceNode import Node
 class Server:
-    def __init__(self):
+    def __init__(self,env):
         self.Nodes=[]
         self.Tasks=[]
         self.vehicles=[]
@@ -21,6 +22,10 @@ class Server:
             for node in self.Nodes:
                 if node.location<vehicle.location and (node.location+node.radius)>=vehicle.location:
                     res.append(node)
+        if not res:
+            for n in self.Nodes:
+                if n.type=="U":
+                    self.uav_move(n,vehicle.location)
 
         res.sort(key=lambda x:abs(x.location-vehicle.location))
         return res
@@ -54,3 +59,19 @@ class Server:
 
     def uav_move(self,node,new_loc):
         node.location=new_loc
+
+    def run(self):
+        while True:
+            for t in self.Task_wait_for_decision:
+                if t:
+                    Algorithms.OffloadingDecision(t,self)
+                else:
+                    continue
+            finish_count = 0
+            time_sum = 0
+            for t in self.Tasks:
+                if t.status==3:
+                    finish_count+=1
+                    time_sum+=t.turnoverTime_real
+
+            self.avgLatency=time_sum/finish_count
